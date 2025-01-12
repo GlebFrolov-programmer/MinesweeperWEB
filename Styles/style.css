@@ -1,0 +1,35 @@
+.grid-container {
+    max-width: 800px;              /* Фиксированная ширина контейнера */
+    margin: 0 auto;            /* Центрируем контейнер по горизонтали */
+    padding: 20px;             /* Добавляем отступы внутри контейнера (по желанию) */
+}
+
+#game-container {
+    display: grid;
+    width: fit-content;
+    gap: 1px;
+    margin-top: 30px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.field {
+    width: 30px;
+    height: 30px;
+    background-color: lightgray;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    color: white;
+}
+
+.game-board {
+    display: flex;
+    justify-content: center;
+}
