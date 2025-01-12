@@ -1,4 +1,4 @@
-import { Field, Mines, Playground } from '/Minesweeper.js'
+import { Field, Mines, Playground } from '/Minesweeper2.js'
 
 function new_game() {
     let n;
@@ -28,9 +28,9 @@ function new_game() {
             cell.dataset.x = x;
             cell.dataset.y = y;
             cell.textContent = game._mines._field[x][y];
+            cell.style.backgroundColor = 'lightgrey';
             cell.addEventListener('click', function() {
-                console.log(this);
-                console.log(this.style.backgroundColor);
+                // console.log(this.style.backgroundColor);
                 if (this.style.backgroundColor === 'lightgrey') {
                     this.style.backgroundColor = 'black'; // Сброс цвета
                 } else {
@@ -58,37 +58,3 @@ function new_game() {
 const new_game_btn = document.getElementById('new-game-btn');
 new_game_btn.addEventListener('click', new_game);
 
-
-
-
-
-// Переменные для размера поля
-// let width = 10; // ширина поля
-// let height = 10; // высота поля
-//
-// // Функция для создания игрового поля
-// function createField(width, height) {
-//     const container = document.getElementById('game-container');
-//     container.style.gridTemplateColumns = `repeat(${width}, 1fr)`;
-//
-//     for (let y = 0; y < height; y++) {
-//         for (let x = 0; x < width; x++) {
-//             const cell = document.createElement('div');
-//             cell.classList.add('field');
-//             cell.dataset.x = x;
-//             cell.dataset.y = y;
-//             cell.textContent = `1`;
-//             cell.addEventListener('click', () => handleCellClick(cell));
-//             container.appendChild(cell);
-//         }
-//     }
-// }
-//
-// // Функция обработки клика по ячейке
-// function handleCellClick(cell) {
-//     // Логика обработки клика по ячейке
-//     cell.style.backgroundColor = 'white'; // Пример изменения цвета при клике
-// }
-//
-// // Генерация игрового поля
-// createField(width, height);
