@@ -140,15 +140,20 @@ export class Playground extends Field {
         // Режим выстрела
         if (setBomb === 0) {
             // Выстрел в свободную позицию
-            if (this._mines._field[y][x] !== "X" && this._field[y][x] === "_") {
+            if (this._mines._field[y][x] === "X") {
+                this._field[y][x] = "X";
+                this.loseGame();
+            }
+            else if (this._mines._field[y][x] !== "X" && this._field[y][x] === "_") {
                 this.processEmptyCell(x, y);
             }
             else if (this._mines._field[y][x] !== "X" && this._field[y][x] !== "_") {
                 this.processNumericCell(x, y);
             }
         }
+
         // Режим установки/снятия бомбы
-        else {
+        if (setBomb !== 0) {
             this.toggleBombMark(x, y);
         }
 
@@ -213,17 +218,15 @@ export class Playground extends Field {
         for (let i = x - 1; i <= x + 1; i++) {
             for (let j = y - 1; j <= y + 1; j++) {
                 if ((i === x && j === y) || !this.validCoord(i, j)) continue;
-                console.log(this._field[j][i] === "X", '&&', this._field[j][i] !== this._mines._field[j][i]);
-                // ОШИБКА ТУТ
-                if (this._field[j][i] === "X" && this._field[j][i] !== this._mines._field[j][i]) {
-                    console.log('FALSE', x, y, this._field[j][i] === "X" && this._field[j][i] !== this._mines._field[j][i]);
+                if (this._field[j][i] === "X" && this._mines._field[j][i] !== "X") {
+                    this.loseGame();
+                }
+                if ((this._field[j][i] === "X" || this._mines._field[j][i] === "X") && this._field[j][i] !== this._mines._field[j][i]) {
                     return false;
                 }
 
             }
         }
-        console.log('TRUE',x, y, this);
-        // И ТУТ ОШИБКА
         return true;
     }
 
