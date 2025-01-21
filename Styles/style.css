@@ -59,6 +59,7 @@ body {
 
 .field.active {
     background-color: #bababa; /* Серый фон */
+    /*background-color: #fff;*/
     box-shadow: none; /* Убираем тень */
     transform: scale(0.98); /* Легкое уменьшение */
 }
@@ -68,6 +69,17 @@ body {
     display: flex;
     justify-content: center;
 }
+
+
+/*[data-value="X"] { color: red; }*/
+/*[data-value="0"] { color: grey; }*/
+/*[data-value="1"] { color: blue; }*/
+/*[data-value="2"] { color: green; }*/
+/*[data-value="3"] { color: red; }*/
+/*[data-value="4"] { color: darkblue; }*/
+/*[data-value="5"] { color: maroon; }*/
+/*[data-value="6"] { color: pink; }*/
+/*[data-value="7"] { color: orange; }*/
 
 /*.field[data-value="1"] {*/
 /*    background-color: peachpuff;*/

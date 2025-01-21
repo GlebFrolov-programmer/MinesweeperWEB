@@ -37,11 +37,11 @@ export class Mines extends Field {
     }
 
     generateBombs(startX, startY) {
-        if (this.__countOfMines < Math.floor((this._axisX * this._axisY) / 2)) {
+        // if (this.__countOfMines < Math.floor((this._axisX * this._axisY) / 2)) {
             this.__generateBombs1(startX, startY);
-        } else {
-            this.__generateBombs2(startX, startY);
-        }
+        // } else {
+        //     this.__generateBombs2(startX, startY);
+        // }
     }
 
     __generateBombs1(startX, startY) {
@@ -53,7 +53,11 @@ export class Mines extends Field {
         while (count > 0) {
             const x = valX[Math.floor(Math.random() * valX.length)];
             const y = valY[Math.floor(Math.random() * valY.length)];
-            if (this._field[y][x] !== "X" && !(y === startY && x === startX)) {
+            const isNotNearStart =
+                Math.abs(x - startX) > 1 ||
+                Math.abs(y - startY) > 1;
+            // if (this._field[y][x] !== "X" && !(y === startY && x === startX)) {
+            if (this._field[y][x] !== "X" && isNotNearStart) {
                 this._field[y][x] = "X";
                 count--;
             }
@@ -140,7 +144,10 @@ export class Playground extends Field {
         // Режим выстрела
         if (setBomb === 0) {
             // Выстрел в свободную позицию
-            if (this._mines._field[y][x] === "X") {
+            if (this._field[y][x] === "X"){
+                return;
+            }
+            else if (this._mines._field[y][x] === "X") {
                 this._field[y][x] = "X";
                 this.loseGame();
             }
@@ -154,7 +161,9 @@ export class Playground extends Field {
 
         // Режим установки/снятия бомбы
         if (setBomb !== 0) {
-            this.toggleBombMark(x, y);
+            if (!this.isNumericCell(x, y)) {
+                this.toggleBombMark(x, y);
+            }
         }
 
         // Проверка победы

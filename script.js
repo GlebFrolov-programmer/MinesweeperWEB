@@ -9,11 +9,11 @@ function new_game() {
     }
 
     const [width, height] = sizePlayground;
-    let countOfMines = parseInt(prompt(`Количество бомб (менее ${width * height}): `));
+    let countOfMines = parseInt(prompt(`Количество бомб (менее ${width * height - 9}): `));
 
     // Проверка количества мин
-    while (countOfMines >= width * height || countOfMines <= 0) {
-        countOfMines = parseInt(prompt(`Введите корректное количество бомб (менее ${width * height}): `));
+    while (countOfMines >= width * height - 9 || countOfMines <= 0) {
+        countOfMines = parseInt(prompt(`Введите корректное количество бомб (менее ${width * height - 9}): `));
     }
 
     // Создаем новую игру и сохраняем ее глобально
@@ -94,7 +94,12 @@ function renderPlayground() {
 
                 if (cellValue !== '_') {
                     cell.classList.add('active');
-                    cell.style.backgroundColor = '#f8f8f8';
+                    // cell.style.backgroundColor = '#f8f8f8';
+                    cell.style.backgroundColor = '#fff';
+                }
+
+                if (cell.textContent === '_' && cell.classList.contains('active')) {
+                    cell.classList.remove('active');
                 }
 
                 // Цветовая схема для разных значений
@@ -103,7 +108,7 @@ function renderPlayground() {
                         cell.style.color = 'red';
                         break;
                     case "0":
-                        cell.style.color = 'gray';
+                        cell.style.color = 'grey';
                         break;
                     case "1":
                         cell.style.color = 'blue';
@@ -119,6 +124,12 @@ function renderPlayground() {
                         break;
                     case "5":
                         cell.style.color = 'maroon';
+                        break;
+                    case "6":
+                        cell.style.color = 'pink';
+                        break;
+                    case "7":
+                        cell.style.color = 'orange';
                         break;
                 }
             }
