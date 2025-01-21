@@ -1,60 +1,136 @@
 import { Field, Mines, Playground } from '/Minesweeper2.js'
 
-function new_game() {
-    let n;
-    let countOfMines;
-    let startCoordinates;
+let currentGame; // Глобальная переменная для хранения текущей игры
 
-    n = parseInt(prompt("Введите размер игрового поля (n >= 8): "));
-    while (n < 8) {
-        n = parseInt(prompt("Введите размер игрового поля (n >= 8): "));
+function new_game() {
+    let sizePlayground = prompt("Размер игрового поля X.Y (минимальный размер по осям 8)").split(".").map(Number);
+    while (sizePlayground.length !== 2 || sizePlayground[0] < 8 || sizePlayground[1] < 8) {
+        sizePlayground = prompt("Введите размер игрового поля X и Y через разделитель '.' (минимальный размер по осям 8)").split(".");
     }
 
-    countOfMines = parseInt(prompt(`Количество мин (менее ${n ** 2}): `));
-    startCoordinates = prompt("Начальный выстрел x.y: ").split(".");
-    console.log(n, countOfMines, startCoordinates);
+    const [width, height] = sizePlayground;
+    let countOfMines = parseInt(prompt(`Количество бомб (менее ${width * height}): `));
 
-    let game = new Playground(n, countOfMines, startCoordinates[0], startCoordinates[1]);
-    console.log(game);
+    // Проверка количества мин
+    while (countOfMines >= width * height || countOfMines <= 0) {
+        countOfMines = parseInt(prompt(`Введите корректное количество бомб (менее ${width * height}): `));
+    }
 
+    // Создаем новую игру и сохраняем ее глобально
+    currentGame = new Playground(width, height, countOfMines);
+    console.log('Начало игры', currentGame);
 
     const container = document.getElementById('game-container');
-    container.style.gridTemplateColumns = `repeat(${n}, 1fr)`;
+    container.innerHTML = '';
+    container.style.gridTemplateColumns = `repeat(${width}, 1fr)`;
+    container.style.gridTemplateRows = `repeat(${height}, 1fr)`;
 
-    for (let y = 0; y < n; y++) {
-        for (let x = 0; x < n; x++) {
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
             const cell = document.createElement('div');
             cell.classList.add('field');
             cell.dataset.x = x;
             cell.dataset.y = y;
-            cell.textContent = game._mines._field[x][y];
-            cell.style.backgroundColor = 'lightgrey';
-            cell.addEventListener('click', function() {
-                // console.log(this.style.backgroundColor);
-                if (this.style.backgroundColor === 'lightgrey') {
-                    this.style.backgroundColor = 'black'; // Сброс цвета
-                } else {
-                    this.style.backgroundColor = 'lightgrey'; // Установка нового цвета
-                }
-            });
-            // cell.addEventListener('click', () => handleCellClick(cell));
+            cell.textContent = '_';  // Начальное состояние ячейки
+            cell.style.backgroundColor = 'white';
             container.appendChild(cell);
         }
     }
 }
 
-// document.querySelectorAll('.field').forEach(field => {
-//     field.addEventListener('click', function() {
-//         // Переключение цвета при каждом клике
-//         console.log(field);
-//         console.log(this.style.backgroundColor);
-//         if (this.style.backgroundColor === 'lightgrey') {
-//             this.style.backgroundColor = 'black'; // Сброс цвета
-//         } else
-//             this.style.backgroundColor = 'white';
-//     });
-// });
+function initGameEvents() {
+    const container = document.getElementById('game-container');
 
-const new_game_btn = document.getElementById('new-game-btn');
-new_game_btn.addEventListener('click', new_game);
+    // Левый клик - открытие ячейки
+    container.addEventListener('click', (event) => {
+        if (event.target.classList.contains('field')) {
+            checkPosition(event);
+        }
+    });
 
+    // Правый клик - установка флага/бомбы
+    container.addEventListener('contextmenu', (event) => {
+        event.preventDefault();
+        if (event.target.classList.contains('field')) {
+            setBomb(event);
+        }
+    });
+}
+
+function checkPosition(event) {
+    const cell = event.target;
+    const x = parseInt(cell.dataset.x);
+    const y = parseInt(cell.dataset.y);
+
+    currentGame.checkPosition(x, y);
+    renderPlayground();
+    console.log('Клик по ячейке:', x, y);
+}
+
+function setBomb(event) {
+    const cell = event.target;
+    const x = parseInt(cell.dataset.x);
+    const y = parseInt(cell.dataset.y);
+
+    currentGame.checkPosition(x, y, 1);
+    renderPlayground();
+    console.log('Правый клик по ячейке:', x, y);
+}
+
+function renderPlayground() {
+    const cells = document.querySelectorAll('.field');
+
+    for (let y = 0; y < currentGame._axisY; y++) {
+        for (let x = 0; x < currentGame._axisX; x++) {
+            const cell = Array.from(cells).find(
+                cell =>
+                    parseInt(cell.dataset.x) === x &&
+                    parseInt(cell.dataset.y) === y
+            );
+
+            if (cell) {
+                const cellValue = currentGame._field[y][x];
+                cell.textContent = cellValue;
+
+                if (cellValue !== '_') {
+                    cell.classList.add('active');
+                    cell.style.backgroundColor = '#f8f8f8';
+                }
+
+                // Цветовая схема для разных значений
+                switch(cellValue) {
+                    case "X":
+                        cell.style.color = 'red';
+                        break;
+                    case "0":
+                        cell.style.color = 'gray';
+                        break;
+                    case "1":
+                        cell.style.color = 'blue';
+                        break;
+                    case "2":
+                        cell.style.color = 'green';
+                        break;
+                    case "3":
+                        cell.style.color = 'red';
+                        break;
+                    case "4":
+                        cell.style.color = 'darkblue';
+                        break;
+                    case "5":
+                        cell.style.color = 'maroon';
+                        break;
+                }
+            }
+        }
+    }
+}
+
+// Инициализация событий при загрузке страницы
+document.addEventListener('DOMContentLoaded', () => {
+    const new_game_btn = document.getElementById('new-game-btn');
+    new_game_btn.addEventListener('click', () => {
+        new_game();
+        initGameEvents();
+    });
+});

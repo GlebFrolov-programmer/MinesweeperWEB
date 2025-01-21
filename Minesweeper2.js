@@ -118,7 +118,6 @@ export class Mines extends Field {
 }
 
 
-
 export class Playground extends Field {
     constructor(x, y, countOfMines) {
         super(x, y);
@@ -126,94 +125,126 @@ export class Playground extends Field {
         this._mines = new Mines(x, y, countOfMines);
         this.__countOfShots = 0;
         this.__bombsWasGenerated = false;
-        // this._lose = false;
     }
 
-    checkPosition(x, y, setBomb = 0) {
+    checkPosition(x, y, setBomb = 0, firstShoot = true) {
+        // Проверка корректности координат
+        if (!this.validCoord(x, y)) return;
 
-        if (setBomb !== 0 && /^[+-]?\d+(\.\d+)?$/.test(this._field[y][x])) {
-            return;
-        }
-
-        if (this.__bombsWasGenerated === false) {
+        // Первый запуск - генерация бомб
+        if (!this.__bombsWasGenerated) {
             this._mines.generateBombs(x, y);
             this.__bombsWasGenerated = true;
         }
 
-        // Это выстрел без установки бомбы
-        if (setBomb === 0 && this.validCoord(x, y)) {
-            // Выстрел в свободную позицию, если это не бомба
+        // Режим выстрела
+        if (setBomb === 0) {
+            // Выстрел в свободную позицию
             if (this._mines._field[y][x] !== "X" && this._field[y][x] === "_") {
-                this._field[y][x] = this._mines._field[y][x];
-                this.__countOfShots++;
-
-                // Открыть позиции вокруг нуля с координатами x,y
-                if (this._field[y][x] === "0") {
-                    for (let i = x - 1; i <= x + 1; i++) {
-                        for (let j = y - 1; j <= y + 1; j++) {
-                            if ((i === x && j === y) || !this.validCoord(i, j)) continue;
-                            if (this.validCoord(i, j) && this._field[j][i] === "_") {
-                                // Рекурсия
-                                this.checkPosition(i, j);
-                            }
-                        }
-                    }
-                }
+                this.processEmptyCell(x, y);
             }
-            // Выстрел по числам для открытия позиций вокруг
             else if (this._mines._field[y][x] !== "X" && this._field[y][x] !== "_") {
-                let isEqual = true;
-
-                // Условие на равенство (поля площадки == поля мин)
-                for (let i = x - 1; i <= x + 1; i++) {
-                    for (let j = y - 1; j <= y + 1; j++) {
-                        if ((i === x && j === y) || !this.validCoord(i, j)) continue;
-                        if (this.validCoord(i, j) && this._field[j][i] === "X" && this._field[j][i] !== this._mines._field[j][i]) {
-                            isEqual = false;
-                        }
-                    }
-                }
-
-                if (isEqual) {
-                    for (let i = x - 1; i <= x + 1; i++) {
-                        for (let j = y - 1; j <= y + 1; j++) {
-                            if ((i === x && j === y) || !this.validCoord(i, j)) continue;
-                            if (this.validCoord(i, j) && this._field[j][i] === "_") {
-                                this.checkPosition(i, j);
-                            }
-                        }
-                    }
-                } else {
-                    this.loseGame();
-                    // this._lose = true; // Конец игры, проигрыш
-                }
-            } else {
-                this.loseGame();
-                // this._lose = true; // Конец игры, проигрыш
+                this.processNumericCell(x, y);
             }
         }
-        // Установка бомбы на площадке
-        else if (this.validCoord(x, y) && this._field[y][x] === "_") {
-            this._field[y][x] = "X";
-        }
-        // Удаление бомбы с площадки
+        // Режим установки/снятия бомбы
         else {
-            this._field[y][x] = "_";
+            this.toggleBombMark(x, y);
+        }
+
+        // Проверка победы
+        if (this.checkIsWin()) {
+            this.winGame();
+        }
+    }
+    isNumericCell(x, y) {
+        // Проверка, является ли ячейка числовой
+        const cell = this._field[y][x];
+
+        // Проверяем, что ячейка не пустая и не бомба,
+        // и является числом от 0 до 8
+        return cell !== "_" &&
+            cell !== "X" &&
+            !isNaN(parseInt(cell)) &&
+            parseInt(cell) >= 0 &&
+            parseInt(cell) <= 8;
+    }
+    // Обработка пустой ячейки (с нулем)
+    processEmptyCell(x, y) {
+
+        // if(this._mines._field[y][x] === 'X') {
+        //     this.loseGame();
+        // }
+        this._field[y][x] = this._mines._field[y][x];
+        this.__countOfShots++;
+
+        // Рекурсивное открытие соседних ячеек, если текущая - ноль
+        if (this._field[y][x] === "0") {
+            this.openAdjacentCells(x, y);
         }
     }
 
+    // Открытие соседних ячеек
+    openAdjacentCells(x, y) {
+        for (let i = x - 1; i <= x + 1; i++) {
+            for (let j = y - 1; j <= y + 1; j++) {
+                if ((i === x && j === y) || !this.validCoord(i, j)) continue;
+                if (this._field[j][i] === "_") {
+                    this.checkPosition(i, j, 0, false);
+                }
+            }
+        }
+    }
+
+    // Обработка числовой ячейки
+    processNumericCell(x, y) {
+        // Проверка корректности расстановки бомб вокруг числа
+        if (this.checkBombsAroundNumber(x, y)) {
+            this.openAdjacentCells(x, y);
+        }
+        // else {
+        //     console.log('Проверка корректности бомб вокруг числа');
+        //     this.loseGame();
+        // }
+    }
+
+    // Проверка корректности бомб вокруг числа
+    checkBombsAroundNumber(x, y) {
+        for (let i = x - 1; i <= x + 1; i++) {
+            for (let j = y - 1; j <= y + 1; j++) {
+                if ((i === x && j === y) || !this.validCoord(i, j)) continue;
+                console.log(this._field[j][i] === "X", '&&', this._field[j][i] !== this._mines._field[j][i]);
+                // ОШИБКА ТУТ
+                if (this._field[j][i] === "X" && this._field[j][i] !== this._mines._field[j][i]) {
+                    console.log('FALSE', x, y, this._field[j][i] === "X" && this._field[j][i] !== this._mines._field[j][i]);
+                    return false;
+                }
+
+            }
+        }
+        console.log('TRUE',x, y, this);
+        // И ТУТ ОШИБКА
+        return true;
+    }
+
+    // Переключение метки бомбы
+    toggleBombMark(x, y) {
+        this._field[y][x] = (this._field[y][x] === "_") ? "X" : "_";
+    }
+
     checkIsWin() {
-        return this.__countOfShots === this._n ** 2 - this.__countOfMines;
+        return this.__countOfShots === this._axisX * this._axisY - this.__countOfMines;
     }
 
     winGame() {
         console.clear();
         console.log("!!!Поздравляем! Вы выиграли игру!!!\n");
         this._mines.printField();
+        alert(`Поздравляем! Вы выиграли игру с размерами ${this._axisX}x${this._axisY}`);
     }
 
     loseGame() {
-        console.clear();
+        // console.clear();
         console.log("Так грустно, вы проиграли игру...\n");
 
         for (let i = 0; i < this._n; i++) {
@@ -233,16 +264,17 @@ export class Playground extends Field {
         }
 
         this.printField();
+        alert("Так грустно, вы проиграли игру...")
     }
 }
 
-const p = new Playground(6, 12, 10);
-
+// const p = new Playground(8, 12, 10);
+// console.log(p);
 // p.printField();
-p.checkPosition(1, 1)
-p.printField();
-p.checkPosition(5, 1, 1)
-p.printField();
+// p.checkPosition(1, 1)
+// p.printField();
+// p.checkPosition(5, 1, 1)
+// p.printField();
 
 // const m = new Mines(4, 5, 15);
 // m.printField();

@@ -1,3 +1,7 @@
+body {
+    font-family: Inter, sans-serif;
+}
+
 .grid-container {
     max-width: 800px;              /* Фиксированная ширина контейнера */
     margin: 0 auto;            /* Центрируем контейнер по горизонтали */
@@ -7,7 +11,7 @@
 #game-container {
     display: grid;
     width: fit-content;
-    gap: 1px;
+    gap: 6px;
     margin-top: 30px;
 }
 
@@ -17,19 +21,54 @@
     align-items: center;
 }
 
+/*.field {*/
+/*    width: 30px;*/
+/*    height: 30px;*/
+/*    background-color: lightgray;*/
+/*    display: flex;*/
+/*    justify-content: center;*/
+/*    align-items: center;*/
+/*    cursor: pointer;*/
+/*    user-select: none;*/
+/*    color: white;*/
+/*}*/
+
+
 .field {
     width: 30px;
     height: 30px;
-    background-color: lightgray;
+
+    /* Обычная тень */
+    background: #e0e5ec;
+    border-radius: 3px;
+    box-shadow: 0 0px 6px rgba(0, 0, 0, 0.1);
+
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
     user-select: none;
-    color: white;
+
+    font-weight: 600;
+    transition: all 0.3s ease;
 }
+
+.field:not(.active):hover {
+    box-shadow: 0 0px 8px rgba(0, 0, 0, 0.15);
+}
+
+.field.active {
+    background-color: #bababa; /* Серый фон */
+    box-shadow: none; /* Убираем тень */
+    transform: scale(0.98); /* Легкое уменьшение */
+}
+
 
 .game-board {
     display: flex;
     justify-content: center;
 }
+
+/*.field[data-value="1"] {*/
+/*    background-color: peachpuff;*/
+/*}*/
