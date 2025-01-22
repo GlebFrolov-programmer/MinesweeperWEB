@@ -158,6 +158,34 @@ body {
     cursor: pointer;
 }
 
+#settings-btn {
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    color: #333;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#settings-btn:hover {
+    background-color: #e0e0e0;
+}
+
+#new-game-btn {
+    background-color: #389dfa;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#new-game-btn:hover {
+    background-color: #2a7bd0;
+}
+
 #applySettings {
     background-color: #389dfa;
     color: white;
@@ -168,8 +196,6 @@ body {
     background-color: #f0f0f0;
     border: 1px solid #ddd;
 }
-
-
 
 .win-modal {
     text-align: center;
