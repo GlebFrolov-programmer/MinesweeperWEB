@@ -1,23 +1,18 @@
-import { Field, Mines, Playground } from '/Minesweeper2.js'
+import { Field, Mines, Playground } from './Minesweeper.js'
+import {GameSettings} from './SettingsModal.js'
 
+let settings = new GameSettings();
 let currentGame; // Глобальная переменная для хранения текущей игры
 
-function new_game() {
-    let sizePlayground = prompt("Размер игрового поля X.Y (минимальный размер по осям 8)").split(".").map(Number);
-    while (sizePlayground.length !== 2 || sizePlayground[0] < 8 || sizePlayground[1] < 8) {
-        sizePlayground = prompt("Введите размер игрового поля X и Y через разделитель '.' (минимальный размер по осям 8)").split(".");
-    }
+function new_game(customSettings = null) {
+    const gameSettings = customSettings || settings.preset;
+    const { width, height, mines } = gameSettings;
 
-    const [width, height] = sizePlayground;
-    let countOfMines = parseInt(prompt(`Количество бомб (менее ${width * height - 9}): `));
-
-    // Проверка количества мин
-    while (countOfMines >= width * height - 9 || countOfMines <= 0) {
-        countOfMines = parseInt(prompt(`Введите корректное количество бомб (менее ${width * height - 9}): `));
-    }
+    // Далее код создания игры без изменений
+    currentGame = new Playground(width, height, mines);
 
     // Создаем новую игру и сохраняем ее глобально
-    currentGame = new Playground(width, height, countOfMines);
+    // currentGame = new Playground(width, height, countOfMines);
     console.log('Начало игры', currentGame);
 
     const container = document.getElementById('game-container');
@@ -39,17 +34,23 @@ function new_game() {
 }
 
 function initGameEvents() {
+
     const container = document.getElementById('game-container');
 
+    // Клонирование контейнера для полного удаления всех обработчиков
+    const oldContainer = container;
+    const newContainer = oldContainer.cloneNode(true);
+    oldContainer.parentNode.replaceChild(newContainer, oldContainer);
+
     // Левый клик - открытие ячейки
-    container.addEventListener('click', (event) => {
+    newContainer.addEventListener('click', (event) => {
         if (event.target.classList.contains('field')) {
             checkPosition(event);
         }
     });
 
     // Правый клик - установка флага/бомбы
-    container.addEventListener('contextmenu', (event) => {
+    newContainer.addEventListener('contextmenu', (event) => {
         event.preventDefault();
         if (event.target.classList.contains('field')) {
             setBomb(event);
@@ -97,8 +98,7 @@ function renderPlayground() {
                     // cell.style.backgroundColor = '#f8f8f8';
                     cell.style.backgroundColor = '#fff';
                 }
-
-                if (cell.textContent === '_' && cell.classList.contains('active')) {
+                else if (cell.classList.contains('active')) {
                     cell.classList.remove('active');
                 }
 
@@ -135,13 +135,40 @@ function renderPlayground() {
             }
         }
     }
+    console.log('Следующий шаг игры', currentGame);
 }
 
 // Инициализация событий при загрузке страницы
 document.addEventListener('DOMContentLoaded', () => {
+    // Автоматический запуск игры с настройками по умолчанию (легкий уровень)
+    new_game();
+    initGameEvents();
+
     const new_game_btn = document.getElementById('new-game-btn');
     new_game_btn.addEventListener('click', () => {
         new_game();
         initGameEvents();
+    })
+
+    const new_settings = document.getElementById('settings-btn');
+    // Открытие модального окна с настройками
+    new_settings.addEventListener('click', (event) => {
+        console.log(new_settings);
+        settings.openModal();
+    });
+
+    // обработчик для применения настроек
+    const applySettingsBtn = document.getElementById('applySettings');
+    applySettingsBtn.addEventListener('click', () => {
+        const newSettings = settings.applySettings();
+        if (newSettings) {
+            new_game(newSettings); // Передаем новые настройки
+            initGameEvents();
+        }
+    });
+    // обработчик для отмены настроек
+    const cancelButton = document.getElementById('cancelSettings');
+    cancelButton.addEventListener('click', () => {
+        settings.closeModal();
     });
 });

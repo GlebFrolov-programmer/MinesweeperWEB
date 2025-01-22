@@ -11,7 +11,7 @@
         <header class="header">
             <h2>Minesweeper</h2>
             <section class="header-buttons">
-                <button class="button">Settings</button>
+                <button id="settings-btn">Settings</button>
                 <button id="new-game-btn">New game</button>
             </section>
         </header>
@@ -20,8 +20,69 @@
         </section>
     </div>
 
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <h2>Настройки игры</h2>
+
+            <!-- Выбор сложности -->
+            <div class="difficulty-selection">
+                <label>
+                    <input type="radio" name="difficulty" value="easy" checked>
+                    Легкий (9x9, 10 бомб)
+                </label>
+                <label>
+                    <input type="radio" name="difficulty" value="medium">
+                    Средний (16x16, 40 бомб)
+                </label>
+                <label>
+                    <input type="radio" name="difficulty" value="hard">
+                    Сложный (30x16, 99 бомб)
+                </label>
+                <label>
+                    <input type="radio" name="difficulty" value="expert">
+                    Эксперт (50х50, 500 бомб)
+                </label>
+                <label>
+                    <input type="radio" name="difficulty" value="custom">
+                    Свои настройки
+                </label>
+            </div>
+
+            <!-- Кастомные настройки -->
+            <div id="customSettings" class="hidden">
+                <h3>Пользовательские настройки</h3>
+                <label>Ширина (мин. 8):
+                    <input id="customWidth" type="number" min="8" value="9">
+                </label>
+                <label>Высота (мин. 8):
+                    <input id="customHeight" type="number" min="8" value="9">
+                </label>
+                <label>Количество мин:
+                    <input id="customMines" type="number" min="1" value="10">
+                </label>
+            </div>
+
+            <!-- Кнопки управления -->
+            <div class="modal-actions">
+                <button id="applySettings">Применить</button>
+                <button id="cancelSettings">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Показ/скрытие кастомных настроек
+        document.querySelectorAll('input[name="difficulty"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const customSettings = document.getElementById('customSettings');
+                customSettings.classList.toggle('hidden', this.value !== 'custom');
+            });
+        });
+    </script>
+
+
     <script src="script.js" type="module"></script>
-<!--    <script src="Minesweeper.js" type="module"></script>-->
-    <script src="Minesweeper2.js" type="module"></script>
+    <script src="Minesweeper.js" type="module"></script>
+    <script src="SettingsModal.js" type="module"></script>
 </body>
 </html>

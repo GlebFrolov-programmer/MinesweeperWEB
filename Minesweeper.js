@@ -1,60 +1,71 @@
 export class Field {
-    constructor(n) {
-        this._n = n;
-        this._field = Array.from({ length: n }, () => Array(n).fill('_'));
+    constructor(x, y) {
+        this._axisX = x;
+        this._axisY = y;
+        this._field = Array.from({ length: y }, () => Array(x).fill('_'));
     }
 
     printField() {
-        console.log('    ' + [...Array(this._n).keys()].join(' '));
+        console.log('    ' + [...Array(this._axisX).keys()].join(' '));
         this._field.forEach((line, rowIndex) => {
             console.log(rowIndex + ' | ' + line.join(' '));
         });
     }
 
     validCoord(x, y) {
-        return x >= 0 && x < this._n && y >= 0 && y < this._n;
+        return x >= 0 && x < this._axisX && y >= 0 && y < this._axisY;
     }
 }
 
+// const f = new Field(5, 9)
+// console.log(f);
+// f.printField();
+// console.log(f.validCoord(4, 5))
 
 
 export class Mines extends Field {
-    constructor(n, countOfMines, startX, startY) {
-        super(n);
+    constructor(x, y, countOfMines) {
+        super(x, y);
 
-        if (countOfMines > this._n ** 2 - 1) {
-            this.__countOfMines = Math.floor(this._n ** 2 / 2);
+        if (countOfMines > this._axisX * this._axisY - 1) {
+            this.__countOfMines = Math.floor((this._axisX * this._axisY) / 2);
         } else {
             this.__countOfMines = countOfMines;
         }
 
-        this.__startX = startX;
-        this.__startY = startY;
 
-        if (this.__countOfMines < Math.floor(this._n ** 2 / 2)) {
-            this.__generateBombs1();
-        } else {
-            this.__generateBombs2();
-        }
     }
 
-    __generateBombs1() {
-        const val = Array.from({ length: this._n }, (_, index) => index);
+    generateBombs(startX, startY) {
+        // if (this.__countOfMines < Math.floor((this._axisX * this._axisY) / 2)) {
+            this.__generateBombs1(startX, startY);
+        // } else {
+        //     this.__generateBombs2(startX, startY);
+        // }
+    }
+
+    __generateBombs1(startX, startY) {
+        const valX = Array.from({ length: this._axisX }, (_, index) => index);
+        const valY = Array.from({ length: this._axisY }, (_, index) => index);
         let count = this.__countOfMines;
 
         // Fill field with bombs
         while (count > 0) {
-            const x = val[Math.floor(Math.random() * val.length)];
-            const y = val[Math.floor(Math.random() * val.length)];
-            if (this._field[y][x] !== "X" && !(y === this.__startY && x === this.__startX)) {
+            const x = valX[Math.floor(Math.random() * valX.length)];
+            const y = valY[Math.floor(Math.random() * valY.length)];
+            const isNotNearStart =
+                Math.abs(x - startX) > 1 ||
+                Math.abs(y - startY) > 1;
+            // if (this._field[y][x] !== "X" && !(y === startY && x === startX)) {
+            if (this._field[y][x] !== "X" && isNotNearStart) {
                 this._field[y][x] = "X";
                 count--;
             }
         }
 
         // Fill field values
-        for (let x = 0; x < this._n; x++) {
-            for (let y = 0; y < this._n; y++) {
+        for (let x = 0; x < this._axisX; x++) {
+            for (let y = 0; y < this._axisY; y++) {
                 if (this._field[y][x] !== "X") {
                     this._field[y][x] = this.__countMinesAround(x, y);
                 }
@@ -62,16 +73,16 @@ export class Mines extends Field {
         }
     }
 
-    __generateBombs2() {
+    __generateBombs2(startX, startY) {
         const arrOfCoordinates = [];
 
-        for (let x = 0; x < this._n; x++) {
-            for (let y = 0; y < this._n; y++) {
+        for (let x = 0; x < this._axisX; x++) {
+            for (let y = 0; y < this._axisY; y++) {
                 arrOfCoordinates.push([x, y]);
             }
         }
 
-        arrOfCoordinates.splice(arrOfCoordinates.findIndex(coord => coord[0] === this.__startY && coord[1] === this.__startX), 1);
+        arrOfCoordinates.splice(arrOfCoordinates.findIndex(coord => coord[0] === startY && coord[1] === startX), 1);
 
         let count = this.__countOfMines;
 
@@ -85,8 +96,8 @@ export class Mines extends Field {
         }
 
         // Fill field values
-        for (let x = 0; x < this._n; x++) {
-            for (let y = 0; y < this._n; y++) {
+        for (let x = 0; x < this._axisX; x++) {
+            for (let y = 0; y < this._axisY; y++) {
                 if (this._field[y][x] !== "X") {
                     this._field[y][x] = this.__countMinesAround(x, y);
                 }
@@ -112,158 +123,173 @@ export class Mines extends Field {
 
 
 export class Playground extends Field {
-    constructor(n, countOfMines, startX, startY) {
-        super(n);
+    constructor(x, y, countOfMines) {
+        super(x, y);
         this.__countOfMines = countOfMines;
-        this._mines = new Mines(n, countOfMines, startX, startY);
+        this._mines = new Mines(x, y, countOfMines);
         this.__countOfShots = 0;
-        this._lose = false;
-        this._checkPosition(startX, startY);
+        this.__bombsWasGenerated = false;
     }
 
-    _checkPosition(x, y, setBomb = 0) {
-        // Это выстрел, а не установка бомбы
-        if (setBomb === 0 && this.validCoord(x, y)) {
-            // Выстрел в свободную позицию, если это не бомба
-            if (this._mines._field[y][x] !== "X" && this._field[y][x] === "_") {
-                this._field[y][x] = this._mines._field[y][x];
-                this.__countOfShots++;
+    checkPosition(x, y, setBomb = 0, firstShoot = true) {
+        // Проверка корректности координат
+        if (!this.validCoord(x, y)) return;
 
-                // Открыть позиции вокруг нуля с координатами x,y
-                if (this._field[y][x] === "0") {
-                    for (let i = x - 1; i <= x + 1; i++) {
-                        for (let j = y - 1; j <= y + 1; j++) {
-                            if ((i === x && j === y) || !this.validCoord(i, j)) continue;
-                            if (this.validCoord(i, j) && this._field[j][i] === "_") {
-                                // Рекурсия
-                                this._checkPosition(i, j);
-                            }
-                        }
-                    }
-                }
+        // Первый запуск - генерация бомб
+        if (!this.__bombsWasGenerated) {
+            this._mines.generateBombs(x, y);
+            this.__bombsWasGenerated = true;
+        }
+
+        // Режим выстрела
+        if (setBomb === 0) {
+            // Выстрел в свободную позицию
+            if (this._field[y][x] === "X"){
+                return;
             }
-            // Выстрел по числам для открытия позиций вокруг
+            else if (this._mines._field[y][x] === "X") {
+                this._field[y][x] = "X";
+                this.loseGame();
+            }
+            else if (this._mines._field[y][x] !== "X" && this._field[y][x] === "_") {
+                this.processEmptyCell(x, y);
+            }
             else if (this._mines._field[y][x] !== "X" && this._field[y][x] !== "_") {
-                let isEqual = true;
-
-                // Условие на равенство (поля площадки == поля мин)
-                for (let i = x - 1; i <= x + 1; i++) {
-                    for (let j = y - 1; j <= y + 1; j++) {
-                        if ((i === x && j === y) || !this.validCoord(i, j)) continue;
-                        if (this.validCoord(i, j) && this._field[j][i] === "X" && this._field[j][i] !== this._mines._field[j][i]) {
-                            isEqual = false;
-                        }
-                    }
-                }
-
-                if (isEqual) {
-                    for (let i = x - 1; i <= x + 1; i++) {
-                        for (let j = y - 1; j <= y + 1; j++) {
-                            if ((i === x && j === y) || !this.validCoord(i, j)) continue;
-                            if (this.validCoord(i, j) && this._field[j][i] === "_") {
-                                this._checkPosition(i, j);
-                            }
-                        }
-                    }
-                } else {
-                    this._lose = true; // Конец игры, проигрыш
-                }
-            } else {
-                this._lose = true; // Конец игры, проигрыш
+                this.processNumericCell(x, y);
             }
         }
-        // Установка бомбы на площадке
-        else if (this.validCoord(x, y) && this._field[y][x] === "_") {
-            this._field[y][x] = "X";
+
+        // Режим установки/снятия бомбы
+        if (setBomb !== 0) {
+            if (!this.isNumericCell(x, y)) {
+                this.toggleBombMark(x, y);
+            }
         }
-        // Удаление бомбы с площадки
-        else {
-            this._field[y][x] = "_";
+
+        // Проверка победы
+        if (this.checkIsWin()) {
+            this.winGame();
         }
+    }
+    isNumericCell(x, y) {
+        // Проверка, является ли ячейка числовой
+        const cell = this._field[y][x];
+
+        // Проверяем, что ячейка не пустая и не бомба,
+        // и является числом от 0 до 8
+        return cell !== "_" &&
+            cell !== "X" &&
+            !isNaN(parseInt(cell)) &&
+            parseInt(cell) >= 0 &&
+            parseInt(cell) <= 8;
+    }
+    // Обработка пустой ячейки (с нулем)
+    processEmptyCell(x, y) {
+
+        // if(this._mines._field[y][x] === 'X') {
+        //     this.loseGame();
+        // }
+        this._field[y][x] = this._mines._field[y][x];
+        this.__countOfShots++;
+
+        // Рекурсивное открытие соседних ячеек, если текущая - ноль
+        if (this._field[y][x] === "0") {
+            this.openAdjacentCells(x, y);
+        }
+    }
+
+    // Открытие соседних ячеек
+    openAdjacentCells(x, y) {
+        for (let i = x - 1; i <= x + 1; i++) {
+            for (let j = y - 1; j <= y + 1; j++) {
+                if ((i === x && j === y) || !this.validCoord(i, j)) continue;
+                if (this._field[j][i] === "_") {
+                    this.checkPosition(i, j, 0, false);
+                }
+            }
+        }
+    }
+
+    // Обработка числовой ячейки
+    processNumericCell(x, y) {
+        // Проверка корректности расстановки бомб вокруг числа
+        if (this.checkBombsAroundNumber(x, y)) {
+            this.openAdjacentCells(x, y);
+        }
+        // else {
+        //     console.log('Проверка корректности бомб вокруг числа');
+        //     this.loseGame();
+        // }
+    }
+
+    // Проверка корректности бомб вокруг числа
+    checkBombsAroundNumber(x, y) {
+        for (let i = x - 1; i <= x + 1; i++) {
+            for (let j = y - 1; j <= y + 1; j++) {
+                if ((i === x && j === y) || !this.validCoord(i, j)) continue;
+                if (this._field[j][i] === "X" && this._mines._field[j][i] !== "X") {
+                    this.loseGame();
+                }
+                if ((this._field[j][i] === "X" || this._mines._field[j][i] === "X") && this._field[j][i] !== this._mines._field[j][i]) {
+                    return false;
+                }
+
+            }
+        }
+        return true;
+    }
+
+    // Переключение метки бомбы
+    toggleBombMark(x, y) {
+        this._field[y][x] = (this._field[y][x] === "_") ? "X" : "_";
     }
 
     checkIsWin() {
-        return this.__countOfShots === this._n ** 2 - this.__countOfMines;
+        return this.__countOfShots === this._axisX * this._axisY - this.__countOfMines;
     }
 
     winGame() {
         console.clear();
         console.log("!!!Поздравляем! Вы выиграли игру!!!\n");
         this._mines.printField();
+        this._field = this._mines._field;
+        alert(`Поздравляем! Вы выиграли игру с размерами ${this._axisX}x${this._axisY}`);
     }
 
     loseGame() {
-        console.clear();
+        // console.clear();
         console.log("Так грустно, вы проиграли игру...\n");
 
-        for (let i = 0; i < this._n; i++) {
-            for (let j = 0; j < this._n; j++) {
-                if (this._field[i][j] === "X") {
-                    this._field[i][j] = "_";
+        for (let i = 0; i < this._axisX; i++) {
+            for (let j = 0; j < this._axisY; j++) {
+                if (this._field[j][i] === "X") {
+                    this._field[j][i] = "_";
                 }
             }
         }
 
-        for (let i = 0; i < this._n; i++) {
-            for (let j = 0; j < this._n; j++) {
-                if (this._mines._field[i][j] === "X") {
-                    this._field[i][j] = this._mines._field[i][j];
+        for (let i = 0; i < this._axisX; i++) {
+            for (let j = 0; j < this._axisY; j++) {
+                if (this._mines._field[j][i] === "X") {
+                    this._field[j][i] = this._mines._field[j][i];
                 }
             }
         }
 
         this.printField();
+        alert("Так грустно, вы проиграли игру...")
     }
 }
-/*
-// Ввод параметров для игры
-let n = parseInt(prompt("Введите размер игрового поля (n >= 8): "));
-while (n < 8) {
-    n = parseInt(prompt("Введите размер игрового поля (n >= 8): "));
-}
 
-let countOfMines = parseInt(prompt(`Количество мин (менее ${n ** 2}): `));
-let startCoordinates = prompt("Начальный выстрел x.y: ").split(".");
-let startX = parseInt(startCoordinates[0]);
-let startY = parseInt(startCoordinates[1]);
+// const p = new Playground(8, 12, 10);
+// console.log(p);
+// p.printField();
+// p.checkPosition(1, 1)
+// p.printField();
+// p.checkPosition(5, 1, 1)
+// p.printField();
 
-// Создание игры
-const game = new Playground(n, countOfMines, startX, startY);
-const timeOfGameStart = Date.now() / 1000; // Время начала игры в секундах
-
-// Игровой цикл
-while (true) {
-    console.clear();
-    let [x, y, bomb] = [0, 0, 0]
-    while (true) {
-        try {
-            // !!!ЧИТЫ!!!
-            game._mines.printField();
-            console.log("");
-
-            game.printField();
-            console.log("\nЕсли вы хотите установить бомбу, то параметр не должен равняться 0 и быть целым числом");
-            let shotInput = prompt("Позиция выстрела или установка бомбы (x.y.bomb): ");
-            [x, y, bomb] = shotInput.split(".").map(Number);
-            break;
-        } catch (error) {
-            console.clear();
-            console.log("!!!НЕПРАВИЛЬНЫЙ ВВОД!!! Попробуйте снова ввести позицию выстрела");
-        }
-    }
-
-    game._checkPosition(x, y, bomb);
-
-    // Проверка на выигрыш или проигрыш
-    if (game.checkIsWin()) {
-        game.winGame();
-        console.log("\n", `Параметры: размер ${n}, количество бомб ${countOfMines}`);
-        console.log(`Время игры: ${Math.round((Date.now() / 1000 - timeOfGameStart) * 100) / 100} сек`);
-        break;
-    } else if (game._lose) {
-        game.loseGame();
-        console.log("\n", `Время игры: ${Math.round((Date.now() / 1000 - timeOfGameStart) * 100) / 100} сек`);
-        break;
-    }
-}
-*/
+// const m = new Mines(4, 5, 15);
+// m.printField();
+// m.generateBombs(4, 5)
+// m.printField();
