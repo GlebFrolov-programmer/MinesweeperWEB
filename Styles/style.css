@@ -86,59 +86,6 @@ body {
     display: none;
 }
 
-
-/*.difficulty-selection {*/
-/*    display: flex;*/
-/*    flex-direction: column;*/
-/*    gap: 10px;*/
-/*    margin-bottom: 15px;*/
-/*}*/
-
-/*.difficulty-selection label {*/
-/*    display: flex;*/
-/*    align-items: center;*/
-/*    cursor: pointer;*/
-/*    transition: background-color 0.3s ease;*/
-/*    padding: 8px 12px;*/
-/*    border-radius: 5px;*/
-/*}*/
-
-/*.difficulty-selection label:hover {*/
-/*    background-color: rgba(0, 0, 0, 0.05);*/
-/*}*/
-
-/*.difficulty-selection input[type="radio"] {*/
-/*    margin-right: 10px;*/
-/*    appearance: none;*/
-/*    width: 20px;*/
-/*    height: 20px;*/
-/*    border: 2px solid #007bff;*/
-/*    border-radius: 50%;*/
-/*    outline: none;*/
-/*    cursor: pointer;*/
-/*    transition: all 0.3s ease;*/
-/*}*/
-
-/*.difficulty-selection input[type="radio"]:checked {*/
-/*    background-color: #007bff;*/
-/*    border-color: #007bff;*/
-/*    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);*/
-/*}*/
-
-/*.difficulty-selection input[type="radio"]:checked::after {*/
-/*    content: '✓';*/
-/*    color: white;*/
-/*    display: flex;*/
-/*    justify-content: center;*/
-/*    align-items: center;*/
-/*    font-size: 12px;*/
-/*}*/
-
-/*.difficulty-selection label[data-difficulty="custom"] {*/
-/*    color: #6c757d;*/
-/*    font-style: italic;*/
-/*}*/
-
 .modal {
     display: none;
     position: fixed;
@@ -212,7 +159,7 @@ body {
 }
 
 #applySettings {
-    background-color: #4CAF50;
+    background-color: #389dfa;
     color: white;
     border: none;
 }
@@ -220,4 +167,53 @@ body {
 #cancelSettings {
     background-color: #f0f0f0;
     border: 1px solid #ddd;
+}
+
+
+
+.win-modal {
+    text-align: center;
+    max-width: 500px;
+    padding: 30px;
+    background-color: #f9f9f9;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.win-modal-image {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.victory-img {
+    max-width: 250px;
+    border-radius: 15px;
+    object-fit: cover;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.win-modal-title {
+    color: #389DFAFF;
+    margin-bottom: 15px;
+}
+
+.win-modal-text {
+    color: #333;
+    margin-bottom: 25px;
+}
+
+.excellent-btn {
+    background-color: #389DFAFF;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.excellent-btn:hover {
+    background-color: #62b3ff;
 }

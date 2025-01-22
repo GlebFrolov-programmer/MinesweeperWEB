@@ -253,7 +253,16 @@ export class Playground extends Field {
         console.log("!!!Поздравляем! Вы выиграли игру!!!\n");
         this._mines.printField();
         this._field = this._mines._field;
-        alert(`Поздравляем! Вы выиграли игру с размерами ${this._axisX}x${this._axisY}`);
+        // alert(`Поздравляем! Вы выиграли игру с размерами ${this._axisX}x${this._axisY}`);
+        // Открываем модальное окно победы
+        const winModal = document.getElementById('winModal');
+        winModal.style.display = 'block';
+
+        // Добавляем обработчик для кнопки "Отлично"
+        const excellentButton = document.getElementById('excellentButton');
+        excellentButton.onclick = () => {
+            winModal.style.display = 'none';
+        };
     }
 
     loseGame() {

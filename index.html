@@ -70,6 +70,20 @@
         </div>
     </div>
 
+    <div id="winModal" class="modal" style="display: none;">
+        <div class="modal-content win-modal">
+            <div class="win-modal-image">
+                <img src="images/beavers.png" alt="Победа!" class="victory-img">
+            </div>
+            <h2 class="win-modal-title">Поздравляем!</h2>
+            <p class="win-modal-text">Вы успешно прошли игру и победили!</p>
+            <div class="win-modal-actions">
+                <button id="excellentButton" class="excellent-btn">Отлично!</button>
+            </div>
+        </div>
+    </div>
+
+
     <script>
         // Показ/скрытие кастомных настроек
         document.querySelectorAll('input[name="difficulty"]').forEach(radio => {
